@@ -1,0 +1,10 @@
+Verified+2: Trafodion Jenkins
+Code-Review+2: Suresh Subbiah <suresh.subbiah@hp.com>
+Code-Review+2: Zbigniew Omanski <zbigniew.omanski@hp.com>
+Code-Review+2: Matt Brown <mattbrown@hp.com>
+Workflow+1: Matt Brown <mattbrown@hp.com>
+Submitted-by: Trafodion Jenkins
+Submitted-at: Sat, 12 Jul 2014 02:33:58 +0000
+Reviewed-on: https://review.trafodion.org/82
+Project: trafodion/dcs
+Branch: refs/heads/master
