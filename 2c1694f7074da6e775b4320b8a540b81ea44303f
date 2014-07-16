@@ -1,0 +1,10 @@
+Verified+2: Trafodion Jenkins
+Code-Review+2: Hans Zeller <hans.zeller@hp.com>
+Workflow+1: Hans Zeller <hans.zeller@hp.com>
+Code-Review+2: Dave Birdsall <dave.birdsall@hp.com>
+Code-Review+1: Matt Brown <mattbrown@hp.com>
+Submitted-by: Trafodion Jenkins
+Submitted-at: Wed, 16 Jul 2014 00:14:12 +0000
+Reviewed-on: https://review.trafodion.org/110
+Project: trafodion/dcs
+Branch: refs/heads/proposed/0.8.3
