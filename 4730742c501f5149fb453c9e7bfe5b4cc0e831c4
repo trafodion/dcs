@@ -1,0 +1,12 @@
+Verified+2: Trafodion Jenkins
+Code-Review+1: Anuradha <anuradha.hegde@hp.com>
+Code-Review+2: Dave Birdsall <dave.birdsall@hp.com>
+Code-Review+1: Arvind Narain <arvind.narain@hp.com>
+Code-Review+2: Narendra Goyal <narendra.goyal@hp.com>
+Workflow+1: Narendra Goyal <narendra.goyal@hp.com>
+Code-Review+1: Matt Brown <mattbrown@hp.com>
+Submitted-by: Trafodion Jenkins
+Submitted-at: Fri, 18 Jul 2014 15:29:12 +0000
+Reviewed-on: https://review.trafodion.org/117
+Project: trafodion/dcs
+Branch: refs/heads/proposed/0.8.3
