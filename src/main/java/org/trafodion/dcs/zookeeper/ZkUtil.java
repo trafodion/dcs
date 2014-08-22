@@ -89,7 +89,6 @@ public class ZkUtil {
 			List<String> znodes = zkc.getChildren(znode,null);
 			zkc.close();
 			if(znodes.isEmpty()) {
-				System.err.println("No children found for " + znode);
 				System.out.println("");
 			} else {
 				Scanner scn = new Scanner(znodes.get(0));
