@@ -1,0 +1,9 @@
+Code-Review+1: Steve Varnau <steve.varnau@hp.com>
+Verified+2: Trafodion Jenkins
+Code-Review+2: Aruna Sadashiva <aruna.sadashiva@hp.com>
+Workflow+1: Aruna Sadashiva <aruna.sadashiva@hp.com>
+Submitted-by: Trafodion Jenkins
+Submitted-at: Tue, 28 Oct 2014 23:28:25 +0000
+Reviewed-on: https://review.trafodion.org/622
+Project: trafodion/dcs
+Branch: refs/heads/master
