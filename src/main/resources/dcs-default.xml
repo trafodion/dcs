@@ -363,4 +363,11 @@
         to disable automatic refresh. The default is 5.
     </description>
   </property>
+  <property>
+    <name>dcs.server.user.program.max.heap.pct.exit</name>
+    <value>0</value>
+    <description>
+        When session disconnected, mxosrvr will use this value to decide whether it should exit. Set to 0 to disable the feature.The default is 0. 
+    </description>
+  </property>
 </configuration>
