@@ -2,7 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
 <!--  
 /**
- *(C) Copyright 2013 Hewlett-Packard Development Company, L.P.
+ *(C) Copyright 2013-2015 Hewlett-Packard Development Company, L.P.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -405,6 +405,13 @@
     <value>false</value>
     <description>
         If statistics publication is enabled. The default is false. Set true to enable.
+    </description>
+  </property>
+  <property>
+    <name>dcs.server.user.program.sqlplan.enabled</name>
+    <value>false</value>
+    <description>
+        If sqlplan is enabled for user queries. The default is false. Set true to enable.
     </description>
   </property>
   <property>
