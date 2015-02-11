@@ -68,7 +68,7 @@ public final class DcsServer implements Runnable {
     private DcsNetworkConfiguration netConf;
 	private String[] args;
 	private String instance = null;
-	private int childServers;
+	private int serverThreads;
 	private long startTime;
 	private String serverName;
 	private InfoServer infoServer;
@@ -109,9 +109,12 @@ public final class DcsServer implements Runnable {
 			LOG.debug("args [" + cmd.getArgs().length + "]");
 			instance = cmd.getArgList().get(0).toString();
 			if(cmd.getArgs().length > 2)
-				childServers = Integer.parseInt(cmd.getArgList().get(1).toString());
+			    serverThreads = Integer.parseInt(cmd.getArgList().get(1).toString());
 			else
-				childServers = 1;
+			    serverThreads = 1;
+			
+            LOG.info("instance, serverThreads [" + instance + ", " + serverThreads + "]");
+
 		} catch (NullPointerException e) {
 			LOG.error("No args found: ", e);
 			System.exit(1);
@@ -176,7 +179,7 @@ public final class DcsServer implements Runnable {
 		    }
 
 			pool = Executors.newSingleThreadExecutor();
-			serverManager = new ServerManager(conf,zkc,netConf,instance,infoPort,childServers);
+			serverManager = new ServerManager(conf,zkc,netConf,instance,infoPort,serverThreads);
 		    Future future = pool.submit(serverManager);
 		    future.get();
 		} catch (Exception e) {

@@ -1,5 +1,5 @@
 /**
- *(C) Copyright 2013-2015 Hewlett-Packard Development Company, L.P.
+ *(C) Copyright 2015 Hewlett-Packard Development Company, L.P.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -274,6 +274,7 @@ public final class Constants {
   
   /** Configuration key for Listener request timeout */
   public static final String DCS_MASTER_LISTENER_REQUEST_TIMEOUT = "dcs.master.listener.request.timeout";
+
   /** Listener default request timeout */
   public static final int DEFAULT_LISTENER_REQUEST_TIMEOUT = 30 * 1000; // 30 seconds
   
@@ -286,7 +287,27 @@ public final class Constants {
   public static final String DCS_MASTER_INFO_PORT = "dcs.master.info.port";
   /** Default value for DCS master info port */
   public static final int DEFAULT_DCS_MASTER_INFO_PORT = 40010;
-  
+
+  /** Configuration key for server Listener selector timeout */
+  public static final String DCS_SERVER_LISTENER_SELECTOR_TIMEOUT = "dcs.server.listener.selector.timeout";
+  /** Listener default server selector timeout */
+  public static final int DEFAULT_SERVER_LISTENER_SELECTOR_TIMEOUT = 10 * 1000; // 10 seconds
+
+  /** Configuration key for server Listener request timeout */
+  public static final String DCS_SERVER_LISTENER_REQUEST_TIMEOUT = "dcs.server.listener.request.timeout";
+  /** Listener default server request timeout */
+  public static final int DEFAULT_SERVER_LISTENER_REQUEST_TIMEOUT = 30 * 1000; // 30 seconds
+
+  /** Configuration key for server Listener CONNECTING timeout */
+  public static final String DCS_SERVER_LISTENER_CONNECTING_TIMEOUT = "dcs.server.listener.request.timeout";
+  /** Listener default server CONNECTING timeout */
+  public static final int DEFAULT_SERVER_LISTENER_CONNECTING_TIMEOUT = 30 * 1000; // 30 seconds
+
+  public static final String DCS_SERVERNA_CHECK_TCPIPPORT_ATTEMPTS = "dcs.serverna.check.tcpipport.attempts";
+  public static final int DEFAULT_DCS_SERVERNA_CHECK_TCPIPPORT_ATTEMPTS = 6;
+  public static final String DCS_SERVERNA_CHECK_TCPIPPORT_RETRY_INTERVAL_MILLIS = "dcs.serverna.check.tcpipport.retry.interval.millis";
+  public static final int DEFAULT_DCS_SERVERNA_CHECK_TCPIPPORT_RETRY_INTERVAL_MILLIS = 1000;
+
   /** Configuration key for DCS server info port */
   public static final String DCS_SERVER_INFO_PORT = "dcs.server.info.port";
   /** Default value for DCS server info port */
@@ -448,6 +469,18 @@ public final class Constants {
   
   /** Default value for DcsMaster authorization feature */
   public static final boolean DEFAULT_DCS_MASTER_AUTHORIZATION = DCS_MASTER_AUTHORIZATION_IS_NOT_ENABLED;
+
+  /** shell size in bytes */
+  public static final int OBJECT_SHELL_SIZE   = 8;
+  public static final int OBJREF_SIZE         = 4;
+  public static final int LONG_FIELD_SIZE     = 8;
+  public static final int INT_FIELD_SIZE      = 4;
+  public static final int SHORT_FIELD_SIZE    = 2;
+  public static final int CHAR_FIELD_SIZE     = 2;
+  public static final int BYTE_FIELD_SIZE     = 1;
+  public static final int BOOLEAN_FIELD_SIZE  = 1;
+  public static final int DOUBLE_FIELD_SIZE   = 8;
+  public static final int FLOAT_FIELD_SIZE    = 4;
 
   private Constants() {
     // Can't be instantiated with this ctor.
