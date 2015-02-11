@@ -1,5 +1,5 @@
 /**
- *(C) Copyright 2013 Hewlett-Packard Development Company, L.P.
+ *(C) Copyright 2015 Hewlett-Packard Development Company, L.P.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,180 +60,183 @@ import org.trafodion.dcs.zookeeper.ZkClient;
 import org.trafodion.dcs.zookeeper.ZKConfig;
 
 public final class DcsServer implements Runnable {
-	private static final Log LOG = LogFactory.getLog(DcsServer.class);
-	private Thread thrd;
-	private ZkClient zkc = null;
-	private int zkSessionTimeout;
+    private static final Log LOG = LogFactory.getLog(DcsServer.class);
+    private Thread thrd;
+    private ZkClient zkc = null;
+    private int zkSessionTimeout;
     private Configuration conf;
     private DcsNetworkConfiguration netConf;
-	private String[] args;
-	private String instance = null;
-	private int childServers;
-	private long startTime;
-	private String serverName;
-	private InfoServer infoServer;
-	private int infoPort;
+    private String[] args;
+    private String instance = null;
+    private int serverThreads;
+    private long startTime;
+    private String serverName;
+    private InfoServer infoServer;
+    private int infoPort;
     public static final String SERVER = "server";
     private Metrics metrics;
     private ServerManager serverManager;
     private ExecutorService pool=null;
     private JVMShutdownHook jvmShutdownHook;
-	private static String trafodionHome;
+    private static String trafodionHome;
     
     private class JVMShutdownHook extends Thread {
-    	public void run() {
-    		LOG.debug("JVM shutdown hook is running");  
-    		try {
-    			zkc.close();
-    		} catch (InterruptedException ie) {};
-    	}
+        public void run() {
+            LOG.debug("JVM shutdown hook is running");  
+            try {
+                zkc.close();
+            } catch (InterruptedException ie) {};
+        }
     }
     
-	public DcsServer(String[] args) {
-		this.args = args;
-	   	conf = DcsConfiguration.create();
-		jvmShutdownHook = new JVMShutdownHook();
-		Runtime.getRuntime().addShutdownHook(jvmShutdownHook);
-		thrd = new Thread(this);
-		thrd.start();
-	}
-	
-	public void run () {
-	
-		VersionInfo.logVersion();
-		
-	   	Options opt = new Options();
-		CommandLine cmd;
-		try {
-			cmd = new GnuParser().parse(opt, args);
-			LOG.debug("args [" + cmd.getArgs().length + "]");
-			instance = cmd.getArgList().get(0).toString();
-			if(cmd.getArgs().length > 2)
-				childServers = Integer.parseInt(cmd.getArgList().get(1).toString());
-			else
-				childServers = 1;
-		} catch (NullPointerException e) {
-			LOG.error("No args found: ", e);
-			System.exit(1);
-		} catch (ParseException e) {
-			LOG.error("Could not parse: ", e);
-			System.exit(1);
-		}
-		
-		trafodionHome = System.getProperty(Constants.DCS_TRAFODION_HOME);
+    public DcsServer(String[] args) {
+        this.args = args;
+           conf = DcsConfiguration.create();
+        jvmShutdownHook = new JVMShutdownHook();
+        Runtime.getRuntime().addShutdownHook(jvmShutdownHook);
+        thrd = new Thread(this);
+        thrd.start();
+    }
+    
+    public void run () {
+    
+        VersionInfo.logVersion();
+        
+           Options opt = new Options();
+        CommandLine cmd;
+        try {
+            cmd = new GnuParser().parse(opt, args);
+            LOG.debug("args [" + cmd.getArgs().length + "]");
+            instance = cmd.getArgList().get(0).toString();
+            if(cmd.getArgs().length > 2)
+                serverThreads = Integer.parseInt(cmd.getArgList().get(1).toString());
+            else
+                serverThreads = 1;
+            
+            LOG.info("instance, serverThreads [" + instance + ", " + serverThreads + "]");
 
-		try {
-			zkc = new ZkClient();	   
-			zkc.connect();
-			LOG.info("Connected to ZooKeeper");
-		} catch (Exception e) {
-			LOG.error(e);
-			System.exit(1);
-		}
-		
-		Runtime.getRuntime().addShutdownHook(new Thread() {
-			public void run() {
-				System.out.println("Shutdown Hook is running");
-				try {
-					zkc.close();
-				} catch (InterruptedException ie) {};
-			}
-		});
-		
-		metrics = new Metrics();
-		startTime=System.currentTimeMillis();
+        } catch (NullPointerException e) {
+            LOG.error("No args found: ", e);
+            System.exit(1);
+        } catch (ParseException e) {
+            LOG.error("Could not parse: ", e);
+            System.exit(1);
+        }
+        
+        trafodionHome = System.getProperty(Constants.DCS_TRAFODION_HOME);
 
-		try {
-			
-		   	netConf = new DcsNetworkConfiguration(conf);
-			serverName = netConf.getHostName();
-			
-			// Start the info server.
-			String bindAddr = conf.get(Constants.DCS_SERVER_INFO_BIND_ADDRESS, Constants.DEFAULT_DCS_SERVER_INFO_BIND_ADDRESS);
-			infoPort = conf.getInt(Constants.DCS_SERVER_INFO_PORT, Constants.DEFAULT_DCS_SERVER_INFO_PORT);
-			infoPort += Integer.parseInt(instance);		    
-			boolean auto = this.conf.getBoolean(Constants.DCS_SERVER_INFO_PORT_AUTO,false);
-		    while (true) {
-		    	try {
-		    		if (infoPort >= 0) {
-		    			infoServer = new InfoServer(SERVER, bindAddr, infoPort, false, this.conf);
-		    			infoServer.addServlet("status", "/server-status", ServerStatusServlet.class);
-		    			infoServer.setAttribute(SERVER, this);
-		    			infoServer.start();
-		    		} else {
-			    		LOG.warn("Http server info port is disabled");
-		    		}
-		    		break;
-		    	} catch (BindException e) {
-		    		if (!auto) {
-		    			// auto bind disabled throw BindException
-		    			throw e;
-		    		}
-		    		// auto bind enabled, try to use another port
-		    		LOG.info("Failed binding http info server to port: " + infoPort);
-		    		infoPort++;
-		    	}
-		    }
+        try {
+            zkc = new ZkClient();       
+            zkc.connect();
+            LOG.info("Connected to ZooKeeper");
+        } catch (Exception e) {
+            LOG.error(e);
+            System.exit(1);
+        }
+        
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            public void run() {
+                System.out.println("Shutdown Hook is running");
+                try {
+                    zkc.close();
+                } catch (InterruptedException ie) {};
+            }
+        });
+        
+        metrics = new Metrics();
+        startTime=System.currentTimeMillis();
 
-			pool = Executors.newSingleThreadExecutor();
-			serverManager = new ServerManager(conf,zkc,netConf,instance,infoPort,childServers);
-		    Future future = pool.submit(serverManager);
-		    future.get();
-		} catch (Exception e) {
-			LOG.error(e);
-			e.printStackTrace();
-		} finally {
-			if(pool != null)
-				pool.shutdown();
-			System.exit(0);
-		}
-	}
-	
-	public String getMetrics(){
-		return metrics.toString();
-	}
-	
-	public long getStartTime(){
-		return startTime;
-	}
-	
-	public String getServerName(){
-		return serverName;
-	}
-	
-	public String getMasterHostName() {
-		return serverManager.getMasterHostName();
-	}
-	
-	public InfoServer getInfoServer(){
-		return infoServer;
-	}
-	
-	public int getInfoPort(){
-		return infoPort;
-	}
-	
-	public Configuration getConfiguration(){
-		return conf;
-	}
-	
-	public String getZKQuorumServersString() {
-		return ZKConfig.getZKQuorumServersString(conf);
-	}
-	
-	public String getZKParentZnode() {
-		return serverManager.getZKParentZnode();
-	}
-	
-	public String getUserProgramHome() {
-		return serverManager.getUserProgramHome();
-	}
-	
-	public String getTrafodionHome() {
-		return trafodionHome;
-	}
-	
-	public static void main(String [] args) {
-		DcsServer server = new DcsServer(args);
-	}
+        try {
+            
+               netConf = new DcsNetworkConfiguration(conf);
+            serverName = netConf.getHostName();
+            
+            // Start the info server.
+            String bindAddr = conf.get(Constants.DCS_SERVER_INFO_BIND_ADDRESS, Constants.DEFAULT_DCS_SERVER_INFO_BIND_ADDRESS);
+            infoPort = conf.getInt(Constants.DCS_SERVER_INFO_PORT, Constants.DEFAULT_DCS_SERVER_INFO_PORT);
+            infoPort += Integer.parseInt(instance);            
+            boolean auto = this.conf.getBoolean(Constants.DCS_SERVER_INFO_PORT_AUTO,false);
+            while (true) {
+                try {
+                    if (infoPort >= 0) {
+                        infoServer = new InfoServer(SERVER, bindAddr, infoPort, false, this.conf);
+                        infoServer.addServlet("status", "/server-status", ServerStatusServlet.class);
+                        infoServer.setAttribute(SERVER, this);
+                        infoServer.start();
+                    } else {
+                        LOG.warn("Http server info port is disabled");
+                    }
+                    break;
+                } catch (BindException e) {
+                    if (!auto) {
+                        // auto bind disabled throw BindException
+                        throw e;
+                    }
+                    // auto bind enabled, try to use another port
+                    LOG.info("Failed binding http info server to port: " + infoPort);
+                    infoPort++;
+                }
+            }
+
+            pool = Executors.newSingleThreadExecutor();
+            serverManager = new ServerManager(conf,zkc,netConf,instance,infoPort,serverThreads);
+            Future future = pool.submit(serverManager);
+            future.get();
+        } catch (Exception e) {
+            LOG.error(e);
+            e.printStackTrace();
+        } finally {
+            if(pool != null)
+                pool.shutdown();
+            System.exit(0);
+        }
+    }
+    
+    public String getMetrics(){
+        return metrics.toString();
+    }
+    
+    public long getStartTime(){
+        return startTime;
+    }
+    
+    public String getServerName(){
+        return serverName;
+    }
+    
+    public String getMasterHostName() {
+        return serverManager.getMasterHostName();
+    }
+    
+    public InfoServer getInfoServer(){
+        return infoServer;
+    }
+    
+    public int getInfoPort(){
+        return infoPort;
+    }
+    
+    public Configuration getConfiguration(){
+        return conf;
+    }
+    
+    public String getZKQuorumServersString() {
+        return ZKConfig.getZKQuorumServersString(conf);
+    }
+    
+    public String getZKParentZnode() {
+        return serverManager.getZKParentZnode();
+    }
+    
+    public String getUserProgramHome() {
+        return serverManager.getUserProgramHome();
+    }
+    
+    public String getTrafodionHome() {
+        return trafodionHome;
+    }
+    
+    public static void main(String [] args) {
+        DcsServer server = new DcsServer(args);
+    }
 }
