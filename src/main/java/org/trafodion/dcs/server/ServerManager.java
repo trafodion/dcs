@@ -78,6 +78,9 @@ public final class ServerManager implements Callable {
 	private static String sqlplanEnable;
 	private static int userProgPortMapToSecs;
 	private static int userProgPortBindToSecs;
+    private int maxRestartAttempts;
+    private int retryIntervalMillis;
+	private RetryCounterFactory retryCounterFactory;
 	
 	class RegisteredWatcher implements Watcher {
 		CountDownLatch startSignal;
@@ -173,6 +176,16 @@ public final class ServerManager implements Callable {
 
 		public void exec() throws Exception {
 			cleanupZk();
+			RetryCounter retryCounter = retryCounterFactory.create();
+			while (! isTrafodionRunning()) {
+				LOG.error("Trafodion is not running");
+				if (! retryCounter.shouldRetry()) {
+					return;
+				} else {
+					retryCounter.sleepUntilNextRetry();
+					retryCounter.useRetry();
+				}
+			}
 			LOG.info("User program exec [" + scriptContext.getCommand() + "]");
 			ScriptManager.getInstance().runScript(scriptContext);//This will block while user prog is running
 			LOG.info("User program exit [" + scriptContext.getExitCode()+ "]");
@@ -204,6 +217,16 @@ public final class ServerManager implements Callable {
 				e.printStackTrace();
 				LOG.debug(e);
 			}
+		}
+		
+		private boolean isTrafodionRunning() {
+			ScriptContext scriptContext = new ScriptContext();
+			scriptContext.setHostName(hostName);
+			scriptContext.setScriptName(Constants.SYS_SHELL_SCRIPT_NAME);
+			String command = ("sqcheck");
+			scriptContext.setCommand(command);
+			ScriptManager.getInstance().runScript(scriptContext);//This will block while script is running
+			return scriptContext.getExitCode() != 0 ? false: true;
 		}
 	}
 
@@ -261,6 +284,9 @@ public final class ServerManager implements Callable {
 		this.sqlplanEnable = this.conf.get(Constants.DCS_SERVER_USER_PROGRAM_STATISTICS_SQLPLAN_ENABLE,Constants.DEFAULT_DCS_SERVER_USER_PROGRAM_STATISTICS_SQLPLAN_ENABLE);
 		this.userProgPortMapToSecs = this.conf.getInt(Constants.DCS_SERVER_USER_PROGRAM_PORT_MAP_TIMEOUT_SECONDS,Constants.DEFAULT_DCS_SERVER_USER_PROGRAM_PORT_MAP_TIMEOUT_SECONDS);	   	
 		this.userProgPortBindToSecs = this.conf.getInt(Constants.DCS_SERVER_USER_PROGRAM_PORT_BIND_TIMEOUT_SECONDS,Constants.DEFAULT_DCS_SERVER_USER_PROGRAM_PORT_BIND_TIMEOUT_SECONDS);	   	
+		this.maxRestartAttempts = conf.getInt(Constants.DCS_SERVER_USER_PROGRAM_RESTART_HANDLER_ATTEMPTS ,Constants.DEFAULT_DCS_SERVER_USER_PROGRAM_RESTART_HANDLER_ATTEMPTS);
+		this.retryIntervalMillis = conf.getInt(Constants.DCS_SERVER_USER_PROGRAM_RESTART_HANDLER_RETRY_INTERVAL_MILLIS,Constants.DEFAULT_DCS_SERVER_USER_PROGRAM_RESTART_HANDLER_RETRY_INTERVAL_MILLIS);
+		this.retryCounterFactory = new RetryCounterFactory(this.maxRestartAttempts, this.retryIntervalMillis);
 	}
 
 	@Override
