@@ -1,0 +1,9 @@
+Verified+2: Trafodion Jenkins
+Code-Review+2: Zbigniew Omanski <zbigniew.omanski@hp.com>
+Code-Review+2: Tharak Capirala <capirala.tharaknath@hp.com>
+Workflow+1: Tharak Capirala <capirala.tharaknath@hp.com>
+Submitted-by: Trafodion Jenkins
+Submitted-at: Mon, 23 Feb 2015 19:24:32 +0000
+Reviewed-on: https://review.trafodion.org/1164
+Project: trafodion/dcs
+Branch: refs/heads/master
