@@ -112,6 +112,10 @@
         <enabled>true</enabled>
       </releases>
     </repository>
+    <repository>
+      <id>cloudera</id>
+      <url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
+    </repository>
   </repositories>
    
   <build>
@@ -455,7 +459,8 @@
   	<compileSource>1.6</compileSource>
     
   	<!-- Dependencies -->
-    <hadoop.version>2.4.0</hadoop.version>
+    <!-- hadoop.version>2.4.0</hadoop.version -->
+    <hadoop.version>2.5.0-cdh5.3.0</hadoop.version>
   	<commons-cli.version>1.2</commons-cli.version>
   	<commons-codec.version>1.4</commons-codec.version>
   	<commons-io.version>2.1</commons-io.version>

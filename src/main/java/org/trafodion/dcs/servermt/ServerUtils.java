@@ -302,7 +302,7 @@ public final class ServerUtils  {
         
         zkc.setData(threadRegisteredPath, threadRegisteredData, -1);
         try {
-            Thread.sleep(30000);
+            Thread.sleep(ServerConstants.SERVER_STATUS_DELAY);
         } catch (InterruptedException e) {  }
     }
 
@@ -321,7 +321,7 @@ public final class ServerUtils  {
         
         zkc.setData(threadRegisteredPath, threadRegisteredData, -1);
         try {
-            Thread.sleep(30000);
+            Thread.sleep(ServerConstants.SERVER_STATUS_DELAY);
         } catch (InterruptedException e) {  }
     }
 
@@ -340,7 +340,7 @@ public final class ServerUtils  {
         
         zkc.setData(threadRegisteredPath, threadRegisteredData, -1);
         try {
-            Thread.sleep(30000);
+            Thread.sleep(ServerConstants.SERVER_STATUS_DELAY);
         } catch (InterruptedException e) {  }
     }
 
@@ -360,7 +360,7 @@ public final class ServerUtils  {
         zkc.setData(threadRegisteredPath, threadRegisteredData, -1);
         
         try {
-            Thread.sleep(30000);
+            Thread.sleep(ServerConstants.SERVER_STATUS_DELAY);
         } catch (InterruptedException e) {  }
     }
     
@@ -380,7 +380,7 @@ public final class ServerUtils  {
         zkc.setData(threadRegisteredPath, threadRegisteredData, -1);
         
         try {
-            Thread.sleep(30000);
+            Thread.sleep(ServerConstants.SERVER_STATUS_DELAY);
         } catch (InterruptedException e) {  }
     }
 //================== PORT_IN_USE =======================================================
@@ -414,7 +414,7 @@ public final class ServerUtils  {
         zkc.setData(threadRegisteredPath, threadRegisteredData, -1);
         
         try {
-            Thread.sleep(30000);
+            Thread.sleep(ServerConstants.SERVER_STATUS_DELAY);
         } catch (InterruptedException e) {  }
     }
 //================== DISCONNECTED =======================================================
@@ -429,7 +429,7 @@ public final class ServerUtils  {
         serverState=ServerConstants.SERVER_STATE_CONNECTED;
         
         try {
-            Thread.sleep(30000);
+            Thread.sleep(ServerConstants.SERVER_STATUS_DELAY);
         } catch (InterruptedException e) {  }
     }
 //=================== Watcher ================================================================   

@@ -405,10 +405,7 @@ public final class ServerHandler implements Callable {
             }
             clientData.setThreadRegisteredPath();
             clientData.setThreadRegisteredData();
-            
-            utils.updateServerState(ServerConstants.SERVER_STATE_CONNECTED);
-            key.attach(clientData);
-            this.worker.processData(this, key);
+
             if(LOG.isDebugEnabled())
                 LOG.debug(serverName + ". Read processed");
             return;
