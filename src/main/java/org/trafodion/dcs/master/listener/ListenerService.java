@@ -1,5 +1,5 @@
 /**
- *(C) Copyright 2013 Hewlett-Packard Development Company, L.P.
+ *(C) Copyright 2015 Hewlett-Packard Development Company, L.P.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -317,7 +317,11 @@ public class ListenerService extends Thread{
 				ByteBuffer hdr = clientData.buf[0];
 				hdr.flip();
 				clientData.hdr.extractFromByteArray(hdr);
-				
+                if (clientData.hdr.signature_ == 959447040){
+                    clientData.switchEndian();
+                    hdr = clientData.buf[0];
+                    clientData.hdr.extractFromByteArray(hdr);
+                }
 				if (clientData.hdr.signature_ != ListenerConstants.SIGNATURE)
 					throw new IOException("Wrong signature in read Header : " + clientData.hdr.signature_);
 			}

@@ -1,5 +1,5 @@
 /**
- *(C) Copyright 2013 Hewlett-Packard Development Company, L.P.
+ *(C) Copyright 2015 Hewlett-Packard Development Company, L.P.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,20 @@
 package org.trafodion.dcs.master.listener;
 
 public final class ListenerConstants {
-	// read buffer stat
-	static final int BUFFER_INIT = 0;
-	static final int HEADER_PROCESSED = 1;
-	static final int BODY_PROCESSED = 2;
-	// errors returned by DcsMaster
-	static final int DcsMasterNoSrvrHdl_exn = 5;
+    // read buffer stat
+    static final int BUFFER_INIT = 0;
+    static final int HEADER_PROCESSED = 1;
+    static final int BODY_PROCESSED = 2;
+    // errors returned by DcsMaster
+    static final int DcsMasterParamError_exn = 1;
+    static final int DcsMasterTimeout_exn = 2;
+    static final int DcsMasterNoSrvrHdl_exn = 3;
+    static final int DcsMasterTryAgain_exn = 4;
+    static final int DcsMasterASNotAvailable_exn = 5;
+    static final int DcsMasterDSNotAvailable_exn = 6;
+    static final int DcsMasterPortNotAvailable_exn = 7;
+    static final int DcsMasterInvalidUser_exn = 8;
+    static final int DcsMasterLogonUserFailure_exn = 9;
 	//
 	static final int REQUST_CLOSE = 1;
 	static final int REQUST_WRITE = 2;
@@ -61,5 +69,6 @@ public final class ListenerConstants {
 	static final int MXOSRVR_VERSION_BUILD = 1;
 
 	static final short DCS_MASTER_GETSRVRAVAILABLE = 1000 + 19;
+    static final short DCS_MASTER_CANCELQUERY = 1000 + 13;
 
 }

@@ -82,6 +82,8 @@ public final class ServerManager implements Callable {
     private int retryIntervalMillis;
     private RetryCounterFactory retryCounterFactory;
     
+    private String CLUSTERNAME;
+    private String HOME;
     private String MY_SQROOT;
     private byte[] cert;
     private String key;
@@ -217,7 +219,19 @@ public final class ServerManager implements Callable {
     }
     
     private void getCertificate() throws IOException {
-        String path = MY_SQROOT + "/sqcert/server.crt";
+        String path;
+        CLUSTERNAME = System.getenv("CLUSTERNAME");
+        if(CLUSTERNAME == null || CLUSTERNAME.length() == 0 ) {
+            path = MY_SQROOT + "/sqcert/server.crt";
+        }
+        else {
+            HOME = System.getenv("HOME");
+            if(HOME == null || HOME.length() == 0 ) {
+                LOG.error("Environment variable $HOME is not set.");
+                throw new IOException("Environment variable $HOME is not set.");
+           }
+           path = HOME + "/sqcert/server.crt";
+        }
         int readLength;
         int outLength;
         
