@@ -111,7 +111,7 @@ public final class Constants {
   public static final String DCS_SERVER_USER_PROGRAM_CONNECTING_TIMEOUT = "dcs.server.user.program.connecting.timeout";
   
   /** Default value for DCS server user program connecting timeout */
-  public static final int DEFAULT_DCS_SERVER_USER_PROGRAM_CONNECTING_TIMEOUT = 60; 
+  public static final int DEFAULT_DCS_SERVER_USER_PROGRAM_CONNECTING_TIMEOUT = 60 * 1000; 
   
   /** Configuration key for DCS server user program zookeeper session timeout */
   public static final String DCS_SERVER_USER_PROGRAM_ZOOKEEPER_SESSION_TIMEOUT = "dcs.server.user.program.zookeeper.session.timeout";
