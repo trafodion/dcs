@@ -28,12 +28,14 @@ import java.sql.*;
 import org.trafodion.dcs.Constants;
 import org.trafodion.dcs.util.*;
 import org.trafodion.dcs.servermt.serverDriverInputOutput.*;
+import org.trafodion.dcs.servermt.serverHandler.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class TrafConnection {
     private static  final Log LOG = LogFactory.getLog(TrafConnection.class);
+    private String serverWorkerName = "";
     private Properties prop = null;
     private Connection conn = null;
     private boolean isClosed = true;
@@ -91,8 +93,9 @@ public class TrafConnection {
     public TrafConnection(){
         init();
     }
-    public TrafConnection(ConnectionContext cc) throws SQLException, ClassNotFoundException {
+    public TrafConnection(String serverWorkerName, ClientData clientData, ConnectionContext cc) throws SQLException, ClassNotFoundException {
         init();
+        this.serverWorkerName = serverWorkerName;
         datasource = cc.getDatasource();
         catalog = cc.getCatalog();
         schema = cc.getSchema();
@@ -154,26 +157,33 @@ T2 Driver properties
     idMapFile
 */
         prop = new Properties(); 
-        prop.put("catalog", catalog);
-        prop.put("schema", schema);
-//      prop.put("traceFlag", "3");
-//      prop.put("traceFile", "/opt/home/zomanski/mt/T2trace");
-//        prop.put("batchBinding", batchBinding);
+        prop.setProperty("catalog", catalog);
+        prop.setProperty("schema", schema);
+//      prop.setProperty("traceFlag", "3");
+//      prop.setProperty("traceFile", "/opt/home/zomanski/mt/T2traceMt");
+//      prop.put("batchBinding", batchBinding);
         if(LOG.isDebugEnabled()){
-            LOG.debug(" catalog :" + catalog + " schema :" + schema);
+            LOG.debug(serverWorkerName + ". catalog :" + catalog + " schema :" + schema);
             String[] envs = {"LD_LIBRARY_PATH", "LD_PRELOAD"};
             for (String env: envs) {
                  String value = System.getenv(env);
                  if (value != null) {
-                     LOG.debug( env + " = " + value);
+                     LOG.debug(serverWorkerName + ". " + env + " = " + value);
                  } else {
-                     LOG.debug( env + " is not assigned.");
+                     LOG.debug(serverWorkerName + ". " + env + " is not assigned.");
                  }
              }
         }
         Class.forName(Constants.T2_DRIVER_CLASS_NAME);
         conn = DriverManager.getConnection(Constants.T2_DRIVER_URL, prop);
-        isClosed = false;
+        if (conn.isClosed() == false){
+            isClosed = false;
+            LOG.debug(serverWorkerName + ". T2 connection is open.");
+        }
+        else {
+            isClosed = true;
+            LOG.debug(serverWorkerName + ". T2 connection is close.");
+        }
 
 // isoMapping, termCharset and enforceISO must be set by properties?
         if (isoMapping == SqlUtils.getCharsetValue("ISO8859_1")) {
@@ -225,6 +235,8 @@ T2 Driver properties
         TrafStatement tstmt;
         
         Iterator<String> keySetIterator = statements.keySet().iterator();
+        
+        LOG.debug(serverWorkerName + ". TrafConnection.closeTConnection");
 
         while(keySetIterator.hasNext()){
           String key = keySetIterator.next();
@@ -244,11 +256,13 @@ T2 Driver properties
         TrafStatement trafStatement = null;
         
         if (statements.containsKey(cursorName) == false){
-            trafStatement = new TrafStatement(conn, null);
+            LOG.debug(serverWorkerName + ". TrafConnection.createTrafStatement.containsKey :" + cursorName + " is false ");
+            trafStatement = new TrafStatement(serverWorkerName, conn, null);
             trafStatement.setIsResultSet(isResultSet);
             statements.put(cursorName, trafStatement);
         }
         else{
+            LOG.debug(serverWorkerName + ". TrafConnection.createTrafStatement.containsKey :" + cursorName + " is found ");
             trafStatement = getTrafStatement(cursorName);
             trafStatement.setStatement(conn, null);
             trafStatement.setIsResultSet(isResultSet);
@@ -259,11 +273,13 @@ T2 Driver properties
         TrafStatement trafStatement = null;
         
         if (statements.containsKey(cursorName) == false){
-            trafStatement = new TrafStatement(conn,sqlString);
+            LOG.debug(serverWorkerName + ". TrafConnection.prepareTrafStatement.containsKey :" + cursorName + " is false ");
+            trafStatement = new TrafStatement(serverWorkerName, conn,sqlString);
             trafStatement.setIsResultSet(isResultSet);
             statements.put(cursorName, trafStatement);
         }
         else{
+            LOG.debug(serverWorkerName + ". TrafConnection.prepareTrafStatement.containsKey :" + cursorName + " is found ");
             trafStatement = getTrafStatement(cursorName);
             trafStatement.setStatement(conn, sqlString);
             trafStatement.setIsResultSet(isResultSet);
@@ -476,5 +492,31 @@ T2 Driver properties
     }
     public boolean setEnforceISO(){
         return enforceISO;
+    }
+    public void commit() throws SQLException{
+        if (conn != null && conn.isClosed() == false){
+            LOG.debug(serverWorkerName + ". commit.");
+            conn.commit();
+        }
+    }
+    public void rollback() throws SQLException{
+        if (conn != null && conn.isClosed() == false){
+            LOG.debug(serverWorkerName + ". rollback.");
+            conn.rollback();
+        }
+    }
+    public void setAutoCommit(int option) throws SQLException{
+        boolean autoCommit = true;
+        if (conn != null && conn.isClosed() == false){
+            if (option == 0)
+                autoCommit = false;
+            if(LOG.isDebugEnabled()){
+                if (autoCommit == false)
+                    LOG.debug(serverWorkerName + ". setAutoCommit off.");
+                else
+                    LOG.debug(serverWorkerName + ". setAutoCommit on.");
+            }
+            conn.setAutoCommit(autoCommit);
+        }
     }
 }

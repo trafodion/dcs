@@ -63,7 +63,7 @@ public class ClientData {
     private String threadRegisteredData = null;
     
 //=========== SQL =====================================
-       TrafConnection trafConnection = null;
+   TrafConnection trafConnection = null;
 //=====================================================    
     ClientData(SocketAddress clientSocketAddress, ServerUtils utils){
 
@@ -140,6 +140,7 @@ public class ClientData {
     TrafConnection getTrafConnection(){
         return trafConnection;
     }
+
 //=====================================================
     
     void setByteBufferHeader(ByteBuffer bbHeader){

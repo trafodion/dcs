@@ -1,5 +1,5 @@
 /**
- *(C) Copyright 2013 Hewlett-Packard Development Company, L.P.
+ *(C) Copyright 2015 Hewlett-Packard Development Company, L.P.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,8 @@ public class ClientData {
 	ConnectionContext conectContex = null;
 
 	SocketAddress clientSocketAddress = null;
+    
+    int requestReply = 0;
 
 	ClientData(SocketAddress clientSocketAddress){
 
@@ -54,7 +56,7 @@ public class ClientData {
 
 		this.clientSocketAddress = clientSocketAddress;
 	}
-
+	
 	ByteBuffer[] getByteBufferArray(){
 		return buf;
 	}
@@ -65,5 +67,15 @@ public class ClientData {
 
 	void setByteBufferBody(ByteBuffer body){
 		this.body = body;
+	}
+	void switchEndian(){
+        ByteOrder buffOrder = header.order();
+        if (buffOrder == ByteOrder.BIG_ENDIAN)
+            buffOrder = ByteOrder.LITTLE_ENDIAN;
+        else if (buffOrder == ByteOrder.LITTLE_ENDIAN)
+            buffOrder = ByteOrder.BIG_ENDIAN;
+        header.order(buffOrder);
+        body.order(buffOrder);
+        header.position(0);
 	}
 }
