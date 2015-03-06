@@ -24,6 +24,7 @@ import java.nio.channels.spi.*;
 import java.sql.SQLException;
 import java.util.*;
 import java.lang.reflect.Array;
+import java.math.*;
 
 import org.trafodion.jdbc.t2.*;
 
@@ -54,6 +55,7 @@ public class ServerApiSqlFetch {
     private ClientData clientData;
 //-----------------------------------------------
     private Statement stmt;
+    private PreparedStatement pstmt;
     private ResultSet rs;
     private ResultSetMetaData rsMD;
     private SQLMXResultSet sqlrs;
@@ -174,8 +176,8 @@ public class ServerApiSqlFetch {
 //=========================================================================
             trafConn = clientData.getTrafConnection();
             trafStmt = trafConn.getTrafStatement(stmtLabel);
+            rs = trafStmt.getResultSet();
             stmt = trafStmt.getStatement();
-            rs = stmt.getResultSet();
 //
 //=====================Process ServerApiSqlFetch===========================
             maxRowLen = trafStmt.getOutParamLength();
@@ -185,16 +187,24 @@ public class ServerApiSqlFetch {
             if(LOG.isDebugEnabled())
                 LOG.debug(serverWorkerName + ". outParamLength :" + maxRowLen);
             
+            returnCode = ServerConstants.SQL_SUCCESS;
+            
             try {
                 while( true){
                     Descriptor2[] desc = outDescList.getDescriptors2();
                     Descriptor2 dsc;
                     int dataType = 0;
                     int dataMaxLen = 0;
+                    sqlrs = (SQLMXResultSet)rs;
                     if (false == rs.next()){
+                        if(LOG.isDebugEnabled())
+                            LOG.debug(serverWorkerName + ". T2 Fetch.rs.next() false");
                         break;
                     }
-                    sqlrs = (SQLMXResultSet)rs;
+                    else{
+                        if(LOG.isDebugEnabled())
+                            LOG.debug(serverWorkerName + ". T2 Fetch.rs.next() true");
+                    }
                     if(totalOutLen == 0){
                         totalOutLen = maxRowLen * maxRowCnt;
                         outValues = new byte[(int)totalOutLen];
@@ -254,6 +264,11 @@ public class ServerApiSqlFetch {
 //
 // check if ByteBuffer is big enough for output
 //      
+            if(rowsAffected == 0 && returnCode == ServerConstants.SQL_SUCCESS)
+                returnCode = ServerConstants.SQL_NO_DATA_FOUND;
+            if(LOG.isDebugEnabled())
+                LOG.debug(serverWorkerName + ". returnCode :" + returnCode);
+            
             int dataLength = ServerConstants.INT_FIELD_SIZE;                 //returnCode
             
             if (returnCode != ServerConstants.SQL_SUCCESS && returnCode != ServerConstants.SQL_NO_DATA_FOUND) {
@@ -275,10 +290,6 @@ public class ServerApiSqlFetch {
                 bbBody = ByteBufferUtils.increaseCapacity(bbBody, dataLength > ServerConstants.BODY_SIZE ? dataLength : ServerConstants.BODY_SIZE );
 
 //===================== build output ==============================================
-            if(rowsAffected == 0)
-                returnCode = ServerConstants.SQL_NO_DATA_FOUND;
-            if(LOG.isDebugEnabled())
-                LOG.debug(serverWorkerName + ". returnCode :" + returnCode);
             bbBody.putInt(returnCode);
             
             if (returnCode != ServerConstants.SQL_SUCCESS && returnCode != ServerConstants.SQL_NO_DATA_FOUND) {

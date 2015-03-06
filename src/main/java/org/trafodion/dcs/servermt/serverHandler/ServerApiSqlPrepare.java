@@ -22,6 +22,7 @@ import java.nio.*;
 import java.nio.channels.*;
 import java.nio.channels.spi.*;
 import java.util.*;
+import java.math.*;
 
 import org.trafodion.jdbc.t2.*;
 
@@ -233,23 +234,29 @@ public class ServerApiSqlPrepare {
                 trafConn = clientData.getTrafConnection();
                 trafStmt = trafConn.prepareTrafStatement(stmtLabel, sqlString, isResultSet);
                 pstmt = (PreparedStatement)trafStmt.getStatement();
-                pstmt.setFetchSize(125);                //????????????????????????????????
-//-------------------------------------------------------------
-                if(isResultSet == true){
-                    rsmd = pstmt.getMetaData();
-                    outNumberParams = rsmd.getColumnCount();
-                }
-//-------------------------------------------------------------                
+                rsmd = pstmt.getMetaData();
                 pmd = pstmt.getParameterMetaData();
+                
+                if(LOG.isDebugEnabled()){
+                    LOG.debug(serverWorkerName + ". pstmt :" + pstmt);
+                    LOG.debug(serverWorkerName + ". rsmd :" + rsmd);
+                    LOG.debug(serverWorkerName + ". pmd :" + pmd);
+                }
+//-------------------------------------------------------------
+                if(isResultSet)
+                    outNumberParams = rsmd.getColumnCount();
+                LOG.debug(serverWorkerName + ". outNumberParams :" + outNumberParams);
+//-------------------------------------------------------------                
                 if(pmd != null)
                     inpNumberParams = pmd.getParameterCount();
+                LOG.debug(serverWorkerName + ". inpNumberParams :" + inpNumberParams);
                 
                 if(LOG.isDebugEnabled()){
                     LOG.debug(serverWorkerName + ".outNumberParams :" + outNumberParams);
                     LOG.debug(serverWorkerName + ".inpNumberParams :" + inpNumberParams);
                 }
                 if (outNumberParams > 0){
-                    strsmd = (SQLMXResultSetMetaData)rsmd;
+                    strsmd = ((TResultSetMetaData)rsmd).getSqlResultSetMetaData();
                     outDescList = new Descriptor2List(outNumberParams);
                     
                     for (int column = 1; column <= outNumberParams; column++){
@@ -317,10 +324,10 @@ public class ServerApiSqlPrepare {
                             LOG.debug(serverWorkerName + ".out_allocSize " + column + " :" + dsc.getAllocSize());
                             LOG.debug(serverWorkerName + ".out_varLayout " + column + " :" + dsc.getVarLayout());
                         }
-                       }
+                    }
                 }
                 if (inpNumberParams > 0){
-                    SQLMXParameterMetaData spmtd = (SQLMXParameterMetaData)pmd;
+                    spmtd = ((TParameterMetaData)pmd).getSqlParameterMetaData();
                     inpDescList = new Descriptor2List(inpNumberParams);
                     
                     for(int param = 1; param <= inpNumberParams; param++){
@@ -386,7 +393,7 @@ public class ServerApiSqlPrepare {
                             LOG.debug(serverWorkerName + ".inp_allocSize " + param + " :" + dsc.getAllocSize());
                             LOG.debug(serverWorkerName + ".inp_varLayout " + param + " :" + dsc.getVarLayout());
                         }
-                       }
+                    }
                 }
             } catch (SQLException ex){
                 LOG.error(serverWorkerName + ". Prepare.SQLException " + ex);

@@ -211,6 +211,7 @@ public class ServerApiSqlExecute {
 //=============================================================================
             trafConn = clientData.getTrafConnection();
             trafStmt = trafConn.getTrafStatement(stmtLabel);
+            trafStmt.setResultSet(null);
             pstmt = (PreparedStatement)trafStmt.getStatement();
             
             boolean isResultSet = trafStmt.getIsResultSet();
@@ -255,21 +256,32 @@ public class ServerApiSqlExecute {
                
                 if (addedBatches > 1){
                     
+                    if(LOG.isDebugEnabled())
+                        LOG.debug(serverWorkerName + ". T2 Execute.executeBatch()");
+                    
                     int[] numStatus = pstmt.executeBatch();
                     rowsAffected = numStatus.length;
                     
                     if(LOG.isDebugEnabled())
-                        LOG.debug(serverWorkerName + ". Execute.executeBatch rowsAffected :" + rowsAffected);
+                        LOG.debug(serverWorkerName + ". T2 Execute.executeBatch rowsAffected :" + rowsAffected);
                 }
                 else {
+                     
                     boolean status = pstmt.execute();
-                    if(status)
-                        rs = pstmt.getResultSet();
-                    else
-                        rowsAffected = pstmt.getUpdateCount();
-                    
                     if(LOG.isDebugEnabled())
-                        LOG.debug(serverWorkerName + ". Execute.execute status :" + status);
+                         LOG.debug(serverWorkerName + ". T2 Execute.execute() status: " + status);
+                   if(status){
+                        rs = pstmt.getResultSet();
+                        trafStmt.setResultSet(rs);
+                        if(LOG.isDebugEnabled())
+                            LOG.debug(serverWorkerName + ". T2 Execute.getResultSet()");
+                    }
+                    else {
+                        rowsAffected = pstmt.getUpdateCount();
+                        if(LOG.isDebugEnabled())
+                            LOG.debug(serverWorkerName + ". T2 Execute.getUpdateCount() rowsAffected :" + rowsAffected);
+                    }
+                    
                 }
             } catch (BatchUpdateException bex){
                 LOG.error(serverWorkerName + ". Execute.BatchUpdateException " + bex);

@@ -132,7 +132,7 @@ public class ServerApiSqlConnect {
 //=====================Process SqlConnect===========================
             
             try {
-                trafConnection = new TrafConnection(connectionContext);
+                trafConnection = new TrafConnection(serverWorkerName, clientData, connectionContext);
  
                 outConnectionContext.getVersionList().getList()[0].setComponentId((short)4);       //ODBC_SRVR_COMPONENT
                 outConnectionContext.getVersionList().getList()[0].setMajorVersion((short)3);

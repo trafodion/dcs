@@ -36,7 +36,9 @@ import org.apache.commons.logging.LogFactory;
 
 public class TrafStatement {
     private static  final Log LOG = LogFactory.getLog(TrafStatement.class);
+    private String serverWorkerName = "";
     private Statement stmt = null;
+    private PreparedStatement pstmt = null;
     private int outNumberParams = 0;
     private long outParamLength = 0;
     private Descriptor2List outDescList = null;
@@ -44,8 +46,12 @@ public class TrafStatement {
     private int inpNumberParams = 0;
     private long inpParamLength = 0;
     private boolean isResultSet = false;
+    private ResultSet rs = null;
 
-    public TrafStatement(Connection conn, String sqlString) throws SQLException {
+    public TrafStatement(String serverWorkerName, Connection conn, String sqlString) throws SQLException {
+        if(LOG.isDebugEnabled())
+            LOG.debug(serverWorkerName + ". constructor TrafStatement");
+        this.serverWorkerName = serverWorkerName;
         setStatement(conn, sqlString);
     }
     void init(){
@@ -60,6 +66,7 @@ public class TrafStatement {
         inpNumberParams = 0;
         inpParamLength = 0;
         isResultSet = false;
+        rs = null;
     }
     public void closeTStatement(){
         try {
@@ -90,17 +97,31 @@ public class TrafStatement {
     public void setIsResultSet(boolean isResultSet){
         this.isResultSet = isResultSet;
     }
+    public void setResultSet(ResultSet rs){
+        this.rs = rs;
+    }
     public void setStatement(Connection conn, String sqlString) throws SQLException{
-        if (this.stmt != null){
+        if(LOG.isDebugEnabled())
+            LOG.debug(serverWorkerName + ". TrafStatement.setStatement");
+       if (this.stmt != null){
             if (this.stmt.isClosed() == false){
+                if(LOG.isDebugEnabled())
+                    LOG.debug(serverWorkerName + ". T2 stmt.close()");
                 this.stmt.close();
             }
             reset();
         }
-        if (sqlString != null)
-            this.stmt = conn.prepareStatement(sqlString);
-        else
+        if (sqlString != null){
+            pstmt = conn.prepareStatement(sqlString);
+            stmt = pstmt;
+            if(LOG.isDebugEnabled())
+                LOG.debug(serverWorkerName + ". T2 conn.prepareStatement(sqlString) :" + sqlString);
+        }
+        else {
             this.stmt = conn.createStatement();
+            if(LOG.isDebugEnabled())
+                LOG.debug(serverWorkerName + ". T2 conn.createStatement()");
+        }
     }
 //================================================
     public Statement getStatement(){
@@ -126,5 +147,8 @@ public class TrafStatement {
     }
     public boolean getIsResultSet(){
         return isResultSet;
+    }
+    public ResultSet getResultSet(){
+        return rs;
     }
 }
