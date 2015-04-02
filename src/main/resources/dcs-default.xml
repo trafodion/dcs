@@ -107,7 +107,7 @@
     <description>
         Listener Selector timeout. Default 10 seconds.
     </description>
-  </property>  
+  </property>
   <property>
     <name>dcs.server.user.program.max.heap.pct.exit</name>
     <value>0</value>
