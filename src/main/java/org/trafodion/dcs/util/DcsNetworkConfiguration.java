@@ -61,6 +61,7 @@ public class DcsNetworkConfiguration {
     private String intHostAddress;
     private String extHostAddress;
     private String canonicalHostName;
+    private String extInterfaceName;
     private boolean matchedInterface = false;
 
     public DcsNetworkConfiguration(Configuration conf) throws Exception {
@@ -72,19 +73,21 @@ public class DcsNetworkConfiguration {
         if(dcsDnsInterface.equalsIgnoreCase("default")) {
             intHostAddress = extHostAddress = ia.getHostAddress();
             canonicalHostName = ia.getCanonicalHostName();
-            LOG.info("Using local host [" + canonicalHostName + "," + extHostAddress + "]");
+            extInterfaceName = NetworkInterface.getByInetAddress(ia).getDisplayName();
+            LOG.info("Using local host ["+ extInterfaceName + "," + canonicalHostName + "," + extHostAddress + "]");
         } else {            
             // For all nics get all hostnames and addresses    
             // and try to match against dcs.dns.interface property 
             Enumeration<NetworkInterface> nics = NetworkInterface.getNetworkInterfaces();
             while(nics.hasMoreElements() && !matchedInterface) {
                 InetAddress inet = null;
-                        NetworkInterface ni = nics.nextElement();
-                    LOG.info("Found interface [" + ni.getDisplayName() + "]");
+                NetworkInterface ni = nics.nextElement();
+                LOG.info("Found interface [" + ni.getDisplayName() + "]");
                 if (dcsDnsInterface.equalsIgnoreCase(ni.getDisplayName())) {
-                               LOG.info("Matched specified interface ["+ ni.getName() + "]");
+                    LOG.info("Matched specified interface ["+ ni.getName() + "]");
                     inet = getInetAddress(ni);
                     getCanonicalHostName(ni,inet);
+                    extInterfaceName = ni.getDisplayName();
                 } else {
                     Enumeration<NetworkInterface> subIfs = ni.getSubInterfaces();
                     for (NetworkInterface subIf : Collections.list(subIfs)) {
@@ -93,6 +96,7 @@ public class DcsNetworkConfiguration {
                             LOG.info("Matched subIf [" + subIf.getName() + "]");
                             inet = getInetAddress(subIf);
                             getCanonicalHostName(subIf,inet);
+                            extInterfaceName = ni.getDisplayName();
                             break;
                         }
                     }
@@ -165,5 +169,9 @@ public class DcsNetworkConfiguration {
 
     public String getExtHostAddress() {
         return extHostAddress;
+    }
+    
+    public String getExtInterfaceName() {
+        return extInterfaceName;
     }
 }
