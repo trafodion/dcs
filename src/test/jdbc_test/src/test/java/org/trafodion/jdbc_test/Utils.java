@@ -57,8 +57,8 @@ public class Utils
                 System.out.println("url: " + url);
                 usr = props.getProperty("user");
                 System.out.println("usr: " + usr);
-                pwd = props.getProperty("pwd");
-                System.out.println("pwd: " + pwd);
+                pwd = props.getProperty("password");
+                System.out.println("password: " + pwd);
                 catalog = props.getProperty("catalog");
                 System.out.println("catalog: " + catalog);
                 schema = props.getProperty("schema");
