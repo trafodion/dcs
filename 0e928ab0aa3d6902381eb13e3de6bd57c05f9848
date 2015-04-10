@@ -1,0 +1,9 @@
+Verified+2: Trafodion Jenkins
+Code-Review+1: Dave Birdsall <dave.birdsall@hp.com>
+Code-Review+2: Tharak Capirala <capirala.tharaknath@hp.com>
+Workflow+1: Tharak Capirala <capirala.tharaknath@hp.com>
+Submitted-by: Trafodion Jenkins
+Submitted-at: Fri, 10 Apr 2015 17:27:06 +0000
+Reviewed-on: https://review.trafodion.org/1487
+Project: trafodion/dcs
+Branch: refs/heads/master
