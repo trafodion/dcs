@@ -988,7 +988,7 @@ public class TestBasic
         	conn = Utils.getUserConnection();
 			int	minorVer = conn.getMetaData().getDatabaseMinorVersion();
 			//System.out.println("DB minor version : " + minorVer);
-			assertEquals("DB Minor Version", 1, minorVer);
+			assertEquals("DB Minor Version", 2, minorVer);
   	       	conn.close();
 			System.out.println("JDBC Get DB minor version : Passed");
        } catch (Exception ex)
