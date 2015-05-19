@@ -32,10 +32,12 @@ import org.trafodion.dcs.servermt.serverHandler.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
 
 public class TrafConnection {
     private static  final Log LOG = LogFactory.getLog(TrafConnection.class);
     private String serverWorkerName = "";
+    private Configuration conf = null;
     private Properties prop = null;
     private Connection conn = null;
     private boolean isClosed = true;
@@ -159,6 +161,24 @@ T2 Driver properties
         prop = new Properties(); 
         prop.setProperty("catalog", catalog);
         prop.setProperty("schema", schema);
+// Publication Properties
+        conf = clientData.getConf();
+        int statisticsIntervalTime = conf.getInt(Constants.DCS_SERVER_USER_PROGRAM_STATISTICS_INTERVAL_TIME,Constants.DEFAULT_DCS_SERVER_USER_PROGRAM_STATISTICS_INTERVAL_TIME);
+        int statisticsLimitTime = conf.getInt(Constants.DCS_SERVER_USER_PROGRAM_STATISTICS_LIMIT_TIME,Constants.DEFAULT_DCS_SERVER_USER_PROGRAM_STATISTICS_LIMIT_TIME);
+        String statisticsType = conf.get(Constants.DCS_SERVER_USER_PROGRAM_STATISTICS_TYPE,Constants.DEFAULT_DCS_SERVER_USER_PROGRAM_STATISTICS_TYPE);
+        String statisticsEnable = conf.get(Constants.DCS_SERVER_USER_PROGRAM_STATISTICS_ENABLE,Constants.DEFAULT_DCS_SERVER_USER_PROGRAM_STATISTICS_ENABLE);
+        String sqlplanEnable = conf.get(Constants.DCS_SERVER_USER_PROGRAM_STATISTICS_SQLPLAN_ENABLE,Constants.DEFAULT_DCS_SERVER_USER_PROGRAM_STATISTICS_SQLPLAN_ENABLE);
+        if(LOG.isDebugEnabled()){
+            LOG.debug(serverWorkerName + ". Publication properties : statisticsIntervalTime :" + statisticsIntervalTime + " statisticsLimitTime :" + statisticsLimitTime + " statisticsType :" + statisticsType +
+                    " statisticsEnable :" + statisticsEnable + " sqlplanEnable : " + sqlplanEnable);
+        }
+
+        prop.setProperty(Constants.PROPERTY_STATISTICS_INTERVAL_TIME, Integer.toString(statisticsIntervalTime));
+        prop.setProperty(Constants.PROPERTY_STATISTICS_LIMIT_TIME, Integer.toString(statisticsLimitTime));
+        prop.setProperty(Constants.PROPERTY_STATISTICS_TYPE, statisticsType);
+        prop.setProperty(Constants.PROPERTY_PROGRAM_STATISTICS_ENABLE, statisticsEnable);
+        prop.setProperty(Constants.PROPERTY_STATISTICS_SQLPLAN_ENABLE, sqlplanEnable);
+
 //      prop.setProperty("traceFlag", "3");
 //      prop.setProperty("traceFile", "/opt/home/zomanski/mt/T2traceMt");
 //      prop.put("batchBinding", batchBinding);
