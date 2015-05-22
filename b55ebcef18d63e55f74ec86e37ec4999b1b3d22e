@@ -1,0 +1,10 @@
+Verified+2: Trafodion Jenkins
+Code-Review+1: Dave Birdsall <dave.birdsall@hp.com>
+Code-Review+2: Arvind Narain <arvind.narain@hp.com>
+Code-Review+2: Matt Brown <mattbrown@hp.com>
+Workflow+1: Matt Brown <mattbrown@hp.com>
+Submitted-by: Trafodion Jenkins
+Submitted-at: Fri, 22 May 2015 17:45:38 +0000
+Reviewed-on: https://review.trafodion.org/1686
+Project: trafodion/dcs
+Branch: refs/heads/master
