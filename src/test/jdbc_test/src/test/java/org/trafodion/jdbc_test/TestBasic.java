@@ -1648,6 +1648,99 @@ public class TestBasic
         }
 	}
 
+	@Test
+	public void JDBCBasic27() throws InterruptedException, SQLException {
+		System.out.println("Start to test adding prefix in SQL Statement");
+
+		String tableName="qatabmeta";
+
+		Connection conn = null;
+		Statement stmt = null;
+		ResultSet rs = null;
+		ResultSetMetaData rsMD = null;
+		try {
+			conn = Utils.getUserConnection();
+			stmt = conn.createStatement();
+
+		stmt.executeUpdate("set schema " + Utils.catalog + "." + Utils.schema);
+		try {
+	            stmt.executeUpdate("drop table " + tableName);
+		} catch (SQLException e){}
+		stmt.executeUpdate("create table " + tableName + " (c1 char(20), c2 smallint, c3 integer)");
+		stmt.executeUpdate("insert into " + tableName + " values('Moe', 100, 223), ('Curly', 34, 444), ('Larry', 100, 999), ('Moe', 12, 333), ('Moe', 98, 987), ('Moe', 54, 212)");
+			rs = stmt.executeQuery("/* test case**/    select * from " + tableName);
+			rsMD = rs.getMetaData();
+			assertEquals("No. of Columns ", 3, rsMD.getColumnCount());
+			assertEquals("Column 1 column datatype", "CHAR", rsMD.getColumnTypeName(1));
+			assertEquals("Column 2 column datatype", "SMALLINT", rsMD.getColumnTypeName(2));
+			assertEquals("Column 3 column datatype", "INTEGER", rsMD.getColumnTypeName(3)); 
+			assertEquals("Column 1 column name", "C1", rsMD.getColumnName(1));
+			assertEquals("Column 2 column name", "C2", rsMD.getColumnName(2));
+			assertEquals("Column 3 column name", "C3", rsMD.getColumnName(3));
+			rs.next();
+			assertEquals("Column 1 data", "Moe", rs.getString("C1").trim());
+			assertEquals("Column 2 data", 100, rs.getInt("C2"));
+			assertEquals("Column 3 data", 223, rs.getInt("C3"));
+			rs.next();
+			assertEquals("Column 1 data", "Curly", rs.getString(1).trim());
+			assertEquals("Column 2 data", 34, rs.getInt(2));
+			assertEquals("Column 3 data", 444, rs.getInt(3));
+			stmt.executeUpdate("drop table " + tableName);
+
+
+			stmt.executeUpdate("set schema " + Utils.catalog + "." + Utils.schema);
+			try {
+		            stmt.executeUpdate("drop table " + tableName);
+			} catch (SQLException e){}
+	stmt.executeUpdate("create table " + tableName + "(a int not null, b char(20), c smallint, d integer, primary key(a))");
+            stmt.executeUpdate("upsert into " + tableName + " values(1, 'Moe', 100, 223)");
+            stmt.executeUpdate("upsert into " + tableName + " values(2, 'Curly', 34, 444)");
+            stmt.executeUpdate("upsert into " + tableName + " values(3, 'Larry', 100, 999)");
+            stmt.executeUpdate("upsert into " + tableName + " values(1, 'Moe', 12, 333)");
+            stmt.executeUpdate("upsert into " + tableName + " values(2, 'Moe', 98, 987)");
+            stmt.executeUpdate("upsert into " + tableName + " values(1, 'Moe', 54, 212)");
+			rs = stmt.executeQuery("/*test case \n test*/  \n    select count(*) from " + tableName);
+			rs.next();
+			assertEquals("Upsert row count", 3, rs.getInt(1));
+			stmt.executeUpdate("drop table " + tableName);
+
+
+			stmt.executeUpdate("set schema " + Utils.catalog + "." + Utils.schema);
+			try {
+		            stmt.executeUpdate("drop table " + tableName);
+			} catch (SQLException e){}
+			stmt.executeUpdate("create table " + tableName + " (c1 char(20), c2 smallint, c3 integer)");
+		stmt.executeUpdate("insert into " + tableName + " values('Moe', 100, 223), ('Curly', 34, 444), "
+			+ "('Larry', 100, 999), ('Moe', 12, 333), ('Moe', 98, 987), ('Moe', 54, 212)");
+			rs = stmt.executeQuery("/*** \n  ***/     select * from " + tableName);
+			rsMD = rs.getMetaData();
+			assertEquals("No. of Columns ", 3, rsMD.getColumnCount());
+			assertEquals("Column 1 column datatype", "CHAR", rsMD.getColumnTypeName(1));
+			assertEquals("Column 2 column datatype", "SMALLINT", rsMD.getColumnTypeName(2));
+			assertEquals("Column 3 column datatype", "INTEGER", rsMD.getColumnTypeName(3)); 
+			assertEquals("Column 1 column name", "C1", rsMD.getColumnName(1));
+			assertEquals("Column 2 column name", "C2", rsMD.getColumnName(2));
+			assertEquals("Column 3 column name", "C3", rsMD.getColumnName(3));
+			rs.next();
+			assertEquals("Column 1 data", "Moe", rs.getString("C1").trim());
+			assertEquals("Column 2 data", 100, rs.getInt("C2"));
+			assertEquals("Column 3 data", 223, rs.getInt("C3"));
+			rs.next();
+			assertEquals("Column 1 data", "Curly", rs.getString(1).trim());
+			assertEquals("Column 2 data", 34, rs.getInt(2));
+			assertEquals("Column 3 data", 444, rs.getInt(3));
+			stmt.executeUpdate("drop table " + tableName);
+			System.out.println("JDBCBasic1: Passed");
+		} catch (Exception ex) {
+            ex.printStackTrace();
+			fail("Exception in test JDBCMeta.." + ex.getMessage());
+		} finally {
+			rs.close();
+			stmt.close();
+			conn.close();
+		}
+	}
+
 	public static void handleBatchUpdateException(BatchUpdateException e) 
 	{
       int[] bueUpdateCount = e.getUpdateCounts();
